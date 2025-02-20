@@ -1,21 +1,16 @@
 @tool
 extends Node3D
+
+const BONE_SELECTION = preload("res://addons/jigglebones/ui/bone_selection.tscn")
+
 enum Axis {
 	X_Plus, Y_Plus, Z_Plus, X_Minus, Y_Minus, Z_Minus
 }
-
 @export var enabled: bool = true
-@export var bone_name: String:
+@export var active_bone_name: String:
 	set(name):
-		bone_name = name
-		skeleton = get_parent() # Parent must be a Skeleton node
-		if skeleton:
-			skeleton.clear_bones_global_pose_override()
-			var temp_bone_id = skeleton.find_bone(bone_name)
-			if temp_bone_id != -1:
-				bone_id = temp_bone_id
-			
-		
+		open_selection_helper(list_bones(), _on_selection_helper_confirmed)
+
 @export_range(0.1,100,0.1) var stiffness: float = 1
 @export_range(0,100,0.1) var damping: float = 0
 @export var use_gravity: bool = false
@@ -23,6 +18,7 @@ enum Axis {
 @export var forward_axis: Axis = Axis.Z_Minus
 @export_node_path("CollisionShape3D") var collision_shape: NodePath 
 
+@export var bone_name = ""
 var skeleton: Skeleton3D
 var bone_id: int
 var bone_id_parent: int
@@ -36,11 +32,45 @@ func set_collision_shape(path:NodePath) -> void:
 	if collision_sphere:
 		assert(collision_sphere is CollisionShape3D and collision_sphere.shape is SphereShape3D, "%s: Only SphereShapes are supported for CollisionShapes" % [ name ])
 
+func list_bones() -> Array:
+	var skeleton = get_parent()
+	var bones = []
+	if not skeleton:
+		return []
+	for bone in skeleton.get_bone_count():
+		bones.append(skeleton.get_bone_name(bone))
+	return bones
+	
 
+func open_selection_helper(bone_list: Array, return_func: Callable) -> void:
+	if Engine.is_editor_hint():
+		var bone_selection = BONE_SELECTION.instantiate()
+		bone_selection.setup(bone_list)
+		bone_selection.bone_selected.connect(return_func)
+		EditorInterface.popup_dialog_centered(bone_selection)
+
+
+func _on_selection_helper_confirmed(bone: String) -> void:
+	bone_name = bone
+	skeleton = get_parent() # Parent must be a Skeleton node
+	if skeleton:
+		skeleton.clear_bones_global_pose_override()
+		var temp_bone_id = skeleton.find_bone(bone_name)
+		if temp_bone_id != -1:
+			bone_id = temp_bone_id
+		# else:
+		# 	for bone in list_bones():
+		# 		if bone.similarity(bone_name) > 0.3:
+		# 			print_debug("Did you mean ", bone,"?")
+		
 func _ready() -> void:
+	# if Engine.is_editor_hint():
+	# 	EditorInterface.popup_property_selector(self, _on_property_selected, [TYPE_STRING])
+
 	if not enabled:
 		set_physics_process(false)
 		return
+
 	top_level = true  # Ignore parent Transform3Dation
 	skeleton = get_parent() # Parent must be a Skeleton node
 	skeleton.clear_bones_global_pose_override()

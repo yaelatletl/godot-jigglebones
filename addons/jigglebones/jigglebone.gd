@@ -7,7 +7,7 @@ enum Axis {
 	X_Plus, Y_Plus, Z_Plus, X_Minus, Y_Minus, Z_Minus
 }
 @export var enabled: bool = true
-@export var active_bone_name: String:
+@export_enum("Select a bone") var active_bone_name: String:
 	set(name):
 		open_selection_helper(list_bones(), _on_selection_helper_confirmed)
 
@@ -18,7 +18,17 @@ enum Axis {
 @export var forward_axis: Axis = Axis.Z_Minus
 @export_node_path("CollisionShape3D") var collision_shape: NodePath 
 
-@export var bone_name = ""
+@export var bone_name : String:
+	set(name):
+		if not name in list_bones():
+			print_debug("Name not found, please use the bone selection helper (ignore if custom named)")
+		bone_name = name
+		if skeleton:
+			skeleton.clear_bones_global_pose_override()
+			var temp_bone_id = skeleton.find_bone(bone_name)
+			if temp_bone_id != -1:
+				bone_id = temp_bone_id
+
 var skeleton: Skeleton3D
 var bone_id: int
 var bone_id_parent: int
@@ -51,18 +61,9 @@ func open_selection_helper(bone_list: Array, return_func: Callable) -> void:
 
 
 func _on_selection_helper_confirmed(bone: String) -> void:
-	bone_name = bone
-	skeleton = get_parent() # Parent must be a Skeleton node
-	if skeleton:
-		skeleton.clear_bones_global_pose_override()
-		var temp_bone_id = skeleton.find_bone(bone_name)
-		if temp_bone_id != -1:
-			bone_id = temp_bone_id
-		# else:
-		# 	for bone in list_bones():
-		# 		if bone.similarity(bone_name) > 0.3:
-		# 			print_debug("Did you mean ", bone,"?")
-		
+	if bone != "":
+		bone_name = bone
+	
 func _ready() -> void:
 	# if Engine.is_editor_hint():
 	# 	EditorInterface.popup_property_selector(self, _on_property_selected, [TYPE_STRING])

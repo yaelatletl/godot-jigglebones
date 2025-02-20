@@ -39,8 +39,6 @@ func _on_toggle_toggled(use_custom: bool) -> void:
 func _on_accept_pressed() -> void:
 	if toggle.pressed:
 		bone_selected.emit(custom_name.text)
-	else:
-		bone_selected.emit(selected_bone_name["id"])
 	queue_free()
 
 func setup(bone_list: Array = []) -> void:

@@ -137,6 +137,7 @@ This repository is a forked version of the code by Bauxitedev, which includes th
 * Move verification to the start, to reduce code ran in each frame [1]
 * Change to `_physics_process()` for a more consistent simulation [1]
 * Compatibility for 4.0 [2]
+* Added a helper popup for selecting bones [2]
 
 [1] by Cory Petkovsek (@tinmanjuggernaut)
 [2] by Yael Atletl

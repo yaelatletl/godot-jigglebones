@@ -36,9 +36,11 @@ It can be used for:
 
     ![Hierarchy](images/hierarchy.png)
 
-6. With the jigglebone selected, go to the inspector and set the `Bone name` property to the name of the bone you want to turn into a jigglebone. E.g. if you have a bone named "Chin", then it would look like this:
+6. With the jigglebone selected, go to the inspector and select the `Active Bone Name` property. A popup will appear and will allow you to pick the name of the bone you want to turn into a jigglebone. E.g. if you have a bone named "Chin", then it would look like this:
 
     ![Variables](images/variables.png)
+
+Note: You will note the old variable "Bone Name" is still there, you should not edit it manually! It's a bit hacky but helps the addon work and keeps backwards compatibility :)
 
 7. That's all! Enjoy your jiggling! If you want more jigglebones, just repeat step 4-6 again and enter another bone name.
 
